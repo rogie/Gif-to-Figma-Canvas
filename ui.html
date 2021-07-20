@@ -1,0 +1,32 @@
+<h2>GIF to Canvas</h2>
+<input type="file"  accept=".gif" oninput="addGifToCanvas(event)">
+<script>
+  function addGifToCanvas(event){
+    let files = event.target.files
+    console.log(files)
+    Array.from(files).forEach( file => {
+      let reader = new FileReader()
+			reader.onload = async function(e) {
+				var blob = new Blob([reader.result])
+        var blobUrl = URL.createObjectURL(blob)
+        let blobBuffer = await blob.arrayBuffer()
+        console.log('File read: ', blob,blobBuffer)
+
+        var img = new Image()
+        img.onload = function(){
+          parent.postMessage({ 
+					pluginMessage: { 
+              function: "renderImage", 
+              width: img.naturalWidth, 
+              height: img.naturalHeight,
+              encodedImage: new Uint8Array(blobBuffer)
+            } 
+          }, "*");
+
+        }
+        img.src = blobUrl
+      }
+      reader.readAsArrayBuffer(file)
+    })
+  }
+</script>
